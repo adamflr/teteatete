@@ -60,13 +60,13 @@ drop_piece <- function(stage, current_piece, placement, transpose){
   
   top_row_per_col <- h - apply(covered_stage, 2, function(x) ifelse(any(x == 1), min(which(x == 1)), h)) + 1
   lost_row_at_piece_bottom <- dim(current_piece)[1] - apply(current_piece, 2, function(x) max(which(x == 1)))
-  first_hit <- min(max_row_per_col + lost_row_at_piece_bottom)
+  first_hit <- min(top_row_per_col + lost_row_at_piece_bottom)
   
   covered_rows <- first_hit:(first_hit + dim(current_piece)[1] - 1)
   
   stage[covered_rows, covered_columns] <- stage[covered_rows, covered_columns] + current_piece
 
-  stage
+    stage
 }
 
 drop_piece(stage, 1, 1, F) %>% 
