@@ -32,11 +32,20 @@ stage_2_df <- function(x){
 }
 
 plot_stage <- function(stage){
-  g <- ggplot(stage_2_df(stage), aes(col, row, color = as.character(value))) + 
-    geom_point() + 
+  g <- ggplot(stage_2_df(stage) %>% dplyr::filter(value != 0), 
+              aes(col, row, color = as.character(value))) + 
+    geom_point(size = 4, shape = 15) + 
+    geom_hline(yintercept = 0.5) +
+    geom_vline(xintercept = c(0.5, w + 0.5)) +
     coord_equal() +
-    theme(legend.position = "none") +
-    scale_color_manual(values = c("white", "black", "red"))
+    xlim(0, w + 1) + 
+    ylim(0, h) +
+    theme_bw() +
+    theme(legend.position = "none",
+          axis.title = element_blank(),
+          axis.ticks = element_blank(),
+          panel.grid = element_blank(),
+          axis.text = element_blank())
   print(g)
 }
 
@@ -49,6 +58,7 @@ placement <- 3
 transpose <- F
 
 drop_piece <- function(stage, current_piece, placement, transpose){
+  current_piece_no <- current_piece
   current_piece <- pieces[[current_piece]]
   if (transpose) current_piece <- as.matrix(t(current_piece))
   
@@ -58,25 +68,33 @@ drop_piece <- function(stage, current_piece, placement, transpose){
   
   covered_stage <- stage[, covered_columns]
   
-  top_row_per_col <- h - apply(covered_stage, 2, function(x) ifelse(any(x == 1), min(which(x == 1)), h)) + 1
-  lost_row_at_piece_bottom <- dim(current_piece)[1] - apply(current_piece, 2, function(x) max(which(x == 1)))
+  top_row_per_col <- apply(covered_stage, 2, function(x) ifelse(any(x != 0), min(which(x != 0)), h + 1))
+  lost_row_at_piece_bottom <- dim(current_piece)[1] - apply(current_piece, 2, function(x) max(which(x != 0)))
   first_hit <- min(top_row_per_col + lost_row_at_piece_bottom)
   
-  covered_rows <- first_hit:(first_hit + dim(current_piece)[1] - 1)
+  covered_rows <- (first_hit - dim(current_piece)[1]):(first_hit - 1)
   
-  stage[covered_rows, covered_columns] <- stage[covered_rows, covered_columns] + current_piece
-
-    stage
+  if(min(covered_rows) <= 0){
+    errorCondition("Hitting the roof")
+  }
+  
+  stage[covered_rows, covered_columns] <- stage[covered_rows, covered_columns] + current_piece * current_piece_no
+  stage
 }
+
+drop_piece(stage, 1, 2, F)
+
+drop_piece(stage, 1, 1, F) -> stage
 
 drop_piece(stage, 1, 1, F) %>% 
   drop_piece(1, 1, F) %>% 
-  drop_piece(5, 8, T) %>% 
+  drop_piece(5, 13, T) %>% 
   plot_stage()
 
 stage <- matrix(0, h, w)
 
-for(i in 1:10){
+for(i in 1:20){
   stage <- drop_piece(stage, sample(1:7,1), sample(1:10, 1), sample(0:1, 1))
   plot_stage(stage) %>% print()
 }
+
