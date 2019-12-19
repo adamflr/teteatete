@@ -38,15 +38,15 @@ plot_stage <- function(stage){
     geom_hline(yintercept = 0.5) +
     geom_vline(xintercept = c(0.5, w + 0.5)) +
     coord_equal() +
-    xlim(0, w + 1) + 
-    ylim(0, h) +
+    xlim(0, w + 1) +
+    ylim(0, h + 5) +
     theme_bw() +
     theme(legend.position = "none",
           axis.title = element_blank(),
           axis.ticks = element_blank(),
           panel.grid = element_blank(),
           axis.text = element_blank())
-  print(g)
+  g
 }
 
 plot_stage(stage)
@@ -89,7 +89,7 @@ drop_piece(stage, 1, 1, F) -> stage
 drop_piece(stage, 1, 1, F) %>% 
   drop_piece(1, 1, F) %>% 
   drop_piece(5, 13, T) %>% 
-  plot_stage()
+  plot_stage(stage)
 
 stage <- matrix(0, h, w)
 
